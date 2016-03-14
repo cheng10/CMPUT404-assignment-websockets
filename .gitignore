@@ -6,8 +6,6 @@
 # Packages
 *.egg
 *.egg-info
-dist
-build
 eggs
 parts
 bin
@@ -35,3 +33,7 @@ nosetests.xml
 .project
 .pydevproject
 *~
+
+# Application specific files
+.idea
+
