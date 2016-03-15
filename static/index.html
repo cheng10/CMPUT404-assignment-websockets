@@ -252,34 +252,36 @@ function update() {
     drawFrame();
 }
 
-function setWorld(newWorld) {
+function updateWorld(newWorld) {
     world = newWorld;
     drawNextFrame();
 }
-
-
+function getxhr(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    var json = JSON.parse(xhr.responseText);
+                    callback(json);
+                }
+            }
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    xhr.open("GET", url);
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.send(null); 
+}
 function wsSetup() {
-    var url = "ws://"+host+"/subscribe";   
+    var url = "ws://"+host+"/subscribe";
     socket = new WebSocket(url);
     socket.onopen = function() {
-        //XXX: TODO What are you going to do here?
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-         if (xhr.readyState==4) {
-             try {
-                 if (xhr.status==200) {
-                     var json = JSON.parse(xhr.responseText);
-                     callback(json);
-                 }
-             }
-             catch(e) {
-                 alert('Error: ' + e.name);
-             }
-         }
-     };
-     xhr.open("GET","http://" + host + "/world", setWorld);
-     xhr.setRequestHeader("Accept", "application/json");
-     xhr.send(null); 
+        //XXX: TODO What are you going to do here? 
+        // set the initial/current world
+        getxhr("http://" + host + "/world", updateWorld);
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -287,12 +289,12 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here? 
+            //XXX: TODO What are you going to do here?
             var json_msg = JSON.parse(msg.data);
             var entity = Object.keys(json_msg)[0];
-            var data = json_msg[entity];
-            world[entity]= data;
-            drawNextFrame(); 
+            var data =json_msg[entity];
+            world[entity] = data;
+            drawNextFrame();
         } catch (e) {
             alert("socket on message: " + e);
         }
